@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101827">
+<title>Mój czas pracy</title>
+<link rel="manifest" href="manifest.json">
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#131e30;--panel2:#1a2940;--text:#f4f7fb;--muted:#a8b5c9;--accent:#7cdbb2;--line:#2a3a52;--danger:#ff8f8f}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#101c2e 0%,var(--bg) 45%);color:var(--text);font:16px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+main{max-width:850px;margin:0 auto;padding:22px 16px 48px}.top{display:flex;align-items:center;gap:12px;margin:4px 0 22px}.logo{width:48px;height:48px;border-radius:15px;background:var(--accent);color:#0b2920;display:grid;place-items:center;font-size:25px;font-weight:900}.top h1{font-size:24px;line-height:1.1;margin:0}.top p{margin:5px 0 0;color:var(--muted);font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{background:rgba(19,30,48,.95);border:1px solid var(--line);border-radius:18px;padding:17px;margin-bottom:14px;box-shadow:0 8px 28px #0002}.stat small,.label{display:block;color:var(--muted);font-size:13px;margin-bottom:7px}.stat strong{font-size:25px;letter-spacing:-.5px}.section-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 14px;font-size:18px}.section-title span{font-size:13px;color:var(--muted);font-weight:400}
+label{display:block;color:var(--muted);font-size:13px;margin:0 0 6px}input,button{font:inherit}input{width:100%;min-width:0;background:#0d1727;border:1px solid #354761;border-radius:11px;padding:12px;color:var(--text);outline:none}input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #7cdbb222}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.fields .wide{grid-column:1/-1}.btn{border:0;border-radius:12px;padding:12px 15px;font-weight:750;cursor:pointer}.primary{background:var(--accent);color:#0b2920}.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.danger{color:var(--danger);background:transparent;border:1px solid #713d4a;padding:7px 10px;font-size:13px}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}.notice{color:var(--muted);font-size:13px;margin:12px 0 0}.status{border-radius:12px;background:#0d1727;padding:12px;margin:0 0 14px;display:flex;justify-content:space-between;gap:10px;align-items:center}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#728097;margin-right:8px}.dot.on{background:var(--accent);box-shadow:0 0 12px #7cdbb277}.session{border-top:1px solid var(--line);padding:13px 0;display:grid;grid-template-columns:1fr auto;gap:10px}.session:first-child{border-top:0;padding-top:0}.session strong{display:block}.session small{color:var(--muted)}.session .right{text-align:right}.empty{color:var(--muted);text-align:center;padding:22px 8px}.monthrow{display:flex;gap:10px;align-items:end}.monthrow>div{flex:1}.foot{text-align:center;color:#7f8da3;font-size:12px;margin-top:20px}
+@media(min-width:650px){main{padding-top:32px}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.card{padding:20px}.top h1{font-size:28px}}
+@media(max-width:390px){.stat strong{font-size:21px}.fields{gap:9px}.card{padding:14px}}
+</style>
+</head>
+<body>
+<main>
+  <header class="top"><div class="logo">◷</div><div><h1>Mój czas pracy</h1><p>Prosty licznik godzin i zarobków</p></div></header>
+  <section class="grid">
+    <div class="card stat"><small>Ten miesiąc · godziny</small><strong id="monthHours">0 h</strong></div>
+    <div class="card stat"><small>Ten miesiąc · zarobki</small><strong id="monthPay">0,00 zł</strong></div>
+    <div class="card stat"><small>Dzisiaj · czas</small><strong id="todayHours">0 h</strong></div>
+    <div class="card stat"><small>Stawka godzinowa</small><strong id="rateDisplay">30 zł</strong></div>
+  </section>
+
+  <section class="card">
+    <h2 class="section-title">Ustawienia <span>zapisują się na tym urządzeniu</span></h2>
+    <div class="fields">
+      <div class="wide"><label for="rate">Stawka za godzinę (zł)</label><input id="rate" type="number" min="0" step="0.01" value="30" inputmode="decimal"></div>
+    </div>
+    <div class="actions"><button class="btn primary" id="saveRate">Zapisz stawkę</button></div>
+  </section>
+
+  <section class="card">
+    <h2 class="section-title">Rejestracja pracy</h2>
+    <div class="status"><div><span class="dot" id="statusDot"></span><strong id="statusText">Nie rozpoczęto pracy</strong></div><span id="liveTime" style="color:var(--muted);font-size:13px"></span></div>
+    <div class="fields">
+      <div><label for="workDate">Data</label><input id="workDate" type="date"></div>
+      <div><label for="startTime">Godzina rozpoczęcia</label><input id="startTime" type="time" value="08:00"></div>
+      <div><label for="endTime">Godzina zakończenia</label><input id="endTime" type="time" value="16:00"></div>
+      <div><label for="note">Notatka (opcjonalnie)</label><input id="note" type="text" placeholder="np. zmiana poranna" maxlength="80"></div>
+    </div>
+    <p class="notice">Przerwy są wliczane — czas liczymy od rozpoczęcia do zakończenia bez odejmowania przerw.</p>
+    <div class="actions">
+      <button class="btn primary" id="startBtn">Rozpocznij teraz</button>
+      <button class="btn secondary" id="finishBtn">Zakończ i zapisz</button>
+      <button class="btn secondary" id="addBtn">Dodaj wpis ręcznie</button>
+    </div>
+    <p class="notice" id="formMessage" role="status"></p>
+  </section>
+
+  <section class="card">
+    <div class="monthrow">
+      <div><h2 class="section-title">Podsumowanie miesiąca</h2><label for="monthFilter">Wybierz miesiąc</label><input id="monthFilter" type="month"></div>
+      <button class="btn secondary" id="exportBtn">Eksport CSV</button>
+    </div>
+    <div class="grid" style="margin-top:14px">
+      <div class="stat"><small>Przepracowano</small><strong id="filterHours">0 h</strong></div>
+      <div class="stat"><small>Szacowane zarobki</small><strong id="filterPay">0,00 zł</strong></div>
+    </div>
+    <div id="entries" style="margin-top:18px"></div>
+  </section>
+  <p class="foot">Twoje dane są przechowywane lokalnie w przeglądarce. Eksportuj CSV, aby zrobić kopię.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const STORAGE='moj-czas-pracy-v1';
+let state=loadState();
+function loadState(){try{return JSON.parse(localStorage.getItem(STORAGE))||{rate:30,entries:[],active:null}}catch{return {rate:30,entries:[],active:null}}}
+function save(){localStorage.setItem(STORAGE,JSON.stringify(state));render()}
+function pad(n){return String(n).padStart(2,'0')}
+function localDate(d=new Date()){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
+function localTime(d=new Date()){return `${pad(d.getHours())}:${pad(d.getMinutes())}`}
+function money(n){return Number(n||0).toLocaleString('pl-PL',{style:'currency',currency:'PLN'})}
+function duration(start,end){let a=start.split(':').map(Number),b=end.split(':').map(Number);let mins=(b[0]*60+b[1])-(a[0]*60+a[1]);if(mins<0)mins+=1440;return mins}
+function hoursText(mins){let h=mins/60;return `${h.toLocaleString('pl-PL',{maximumFractionDigits:2})} h`}
+function entryMinutes(e){return duration(e.start,e.end)}
+function getMonthEntries(m){return state.entries.filter(e=>e.date.startsWith(m))}
+function totals(entries){const mins=entries.reduce((s,e)=>s+entryMinutes(e),0);return {mins,pay:mins/60*Number(state.rate||0)}}
+function message(t){$('formMessage').textContent=t}
+function render(){
+ $('rate').value=state.rate;$('rateDisplay').textContent=`${Number(state.rate).toLocaleString('pl-PL')} zł`;
+ const now=new Date(),today=localDate(now),month=today.slice(0,7);
+ $('workDate').value=$('workDate').value||today;$('monthFilter').value=$('monthFilter').value||month;
+ const mt=totals(getMonthEntries(month)),tt=totals(state.entries.filter(e=>e.date===today));
+ $('monthHours').textContent=hoursText(mt.mins);$('monthPay').textContent=money(mt.pay);$('todayHours').textContent=hoursText(tt.mins);
+ $('statusDot').classList.toggle('on',!!state.active);$('statusText').textContent=state.active?`Praca rozpoczęta: ${state.active.start}`:'Nie rozpoczęto pracy';
+ $('liveTime').textContent=state.active?`od ${state.active.start}`:'';
+ const ft=totals(getMonthEntries($('monthFilter').value||month));$('filterHours').textContent=hoursText(ft.mins);$('filterPay').textContent=money(ft.pay);
+ const list=$('entries');list.innerHTML='';const items=getMonthEntries($('monthFilter').value||month).slice().sort((a,b)=>(b.date+b.start).localeCompare(a.date+a.start));
+ if(!items.length){list.innerHTML='<div class="empty">Brak wpisów w tym miesiącu. Dodaj pierwszy dzień pracy powyżej.</div>';return}
+ items.forEach(e=>{const mins=entryMinutes(e),div=document.createElement('div');div.className='session';
+ const left=document.createElement('div'),right=document.createElement('div');right.className='right';
+ const strong=document.createElement('strong');strong.textContent=new Date(e.date+'T12:00:00').toLocaleDateString('pl-PL',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+ const small=document.createElement('small');small.textContent=`${e.start}–${e.end} · ${hoursText(mins)}${e.note?' · '+e.note:''}`;left.append(strong,small);
+ const pay=document.createElement('strong');pay.textContent=money(mins/60*Number(state.rate||0));const del=document.createElement('button');del.className='btn danger';del.textContent='Usuń';del.addEventListener('click',()=>{if(confirm('Usunąć ten wpis?')){state.entries=state.entries.filter(x=>x.id!==e.id);save()}});right.append(pay,del);div.append(left,right);list.append(div)});
+}
+$('saveRate').addEventListener('click',()=>{const r=Number($('rate').value);if(!Number.isFinite(r)||r<0){message('Wpisz prawidłową stawkę.');return}state.rate=r;save();message('Stawka zapisana.')});
+$('startBtn').addEventListener('click',()=>{if(state.active){message('Praca jest już rozpoczęta.');return}const now=new Date();state.active={date:localDate(now),start:localTime(now)};$('workDate').value=state.active.date;$('startTime').value=state.active.start;save();message('Zapisano godzinę rozpoczęcia.')});
+$('finishBtn').addEventListener('click',()=>{if(!state.active){message('Najpierw naciśnij „Rozpocznij teraz” albo dodaj wpis ręcznie.');return}const now=new Date();const end=localTime(now);state.entries.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),date:state.active.date,start:state.active.start,end,note:$('note').value.trim()});state.active=null;$('endTime').value=end;$('note').value='';save();message('Zmiana zapisana. Przerwy zostały wliczone.')});
+$('addBtn').addEventListener('click',()=>{const date=$('workDate').value,start=$('startTime').value,end=$('endTime').value;if(!date||!start||!end){message('Uzupełnij datę oraz obie godziny.');return}if(start===end){if(!confirm('Początek i koniec są takie same — zapisać 0 godzin?'))return}state.entries.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),date,start,end,note:$('note').value.trim()});state.entries.sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));$('note').value='';save();message('Wpis dodany.')});
+$('monthFilter').addEventListener('change',render);
+$('exportBtn').addEventListener('click',()=>{const m=$('monthFilter').value,rows=[['Data','Od','Do','Godziny','Stawka PLN/h','Szacowane zarobki PLN','Notatka']];getMonthEntries(m).forEach(e=>{const mins=entryMinutes(e);rows.push([e.date,e.start,e.end,(mins/60).toFixed(2),Number(state.rate).toFixed(2),(mins/60*Number(state.rate)).toFixed(2),e.note||''])});const csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`czas-pracy-${m||'raport'}.csv`;a.click();URL.revokeObjectURL(url)});
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+render();
+</script>
+</body>
+</html>
