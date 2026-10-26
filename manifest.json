@@ -1,7 +1,7 @@
 {
   "name": "Mój czas pracy",
   "short_name": "Czas pracy",
-  "description": "Licznik godzin pracy i miesięcznych zarobków",
+  "description": "Kalendarz, statystyki i kopie zapasowe godzin pracy",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
